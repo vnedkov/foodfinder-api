@@ -15,11 +15,11 @@ type errorResponse struct {
 
 // handleError is a helper function that writes an error response to the client
 func handleError(w http.ResponseWriter, r *http.Request, err error, responseStatus int, msg ...string) bool {
-	errMsg := strings.Join(msg, "")
 	if err == nil {
 		return false
 	}
 
+	errMsg := strings.Join(msg, "")
 	log.Err(err).Msg(errMsg)
 
 	resp, _ := json.Marshal(errorResponse{Error: errMsg})
