@@ -48,13 +48,13 @@ func TypedClient() *elasticsearch.TypedClient {
 
 // FromContext returns the Elasticsearch client attached to the context.
 func FromContext(ctx context.Context) (*elasticsearch.TypedClient, error) {
-	if es, ok := ctx.Value(esClientKey{}).(elasticsearch.TypedClient); ok {
-		return &es, nil
+	if es, ok := ctx.Value(esClientKey{}).(*elasticsearch.TypedClient); ok {
+		return es, nil
 	}
 	return NewTypedClient()
 }
 
 // WithContext returns a new context with the Elasticsearch client attached.
-func WithContext(ctx context.Context, es elasticsearch.TypedClient) context.Context {
+func WithContext(ctx context.Context, es *elasticsearch.TypedClient) context.Context {
 	return context.WithValue(ctx, esClientKey{}, es)
 }

@@ -30,7 +30,6 @@ func (l *CustomLogger) LogRoundTrip(
 	)
 
 	// Set error level.
-	//
 	switch {
 	case err != nil:
 		e = l.Error()
@@ -48,18 +47,15 @@ func (l *CustomLogger) LogRoundTrip(
 	var reqBody []byte
 	var resBody []byte
 	if req != nil && req.Body != nil && req.Body != http.NoBody {
-		// nReq, _ = io.Copy(io.Discard, req.Body)
 		reqBody, _ = io.ReadAll(req.Body)
 		nReq = int64(len(reqBody))
 	}
 	if res != nil && res.Body != nil && res.Body != http.NoBody {
-		// nRes, _ = io.Copy(io.Discard, res.Body)
 		resBody, _ = io.ReadAll(res.Body)
 		nRes = int64(len(resBody))
 	}
 
 	// Log event.
-	//
 	e.Str("method", req.Method).
 		Int("status_code", res.StatusCode).
 		Dur("duration", dur).
