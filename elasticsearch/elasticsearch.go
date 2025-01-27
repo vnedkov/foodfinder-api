@@ -5,6 +5,7 @@ import (
 	"foodfinder-api/config"
 
 	"github.com/elastic/go-elasticsearch/v8"
+	"github.com/rs/zerolog/log"
 )
 
 var esTypedClient *elasticsearch.TypedClient
@@ -12,24 +13,30 @@ var Index string = "foodfinder"
 
 // init initializes the Elasticsearch client when the package is loaded.
 func init() {
-	esTypedClient = NewTypedClient()
+	var err error
+	esTypedClient, err = NewTypedClient()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to create Elasticsearch client")
+	}
 	if config.ES_INDEX.Get(config.Global()) != "" {
 		Index = config.ES_INDEX.Get(config.Global())
 	}
 }
 
 // NewClient creates a new Elasticsearch client.
-func NewTypedClient() *elasticsearch.TypedClient {
+func NewTypedClient() (*elasticsearch.TypedClient, error) {
 	cfg := config.Global()
-	es, err := elasticsearch.NewTypedClient(elasticsearch.Config{
+
+	esCfg := elasticsearch.Config{
 		Addresses: []string{config.ES_URL.Get(cfg)},
 		Username:  config.ES_USER.Get(cfg),
 		Password:  config.ES_PASS.Get(cfg),
-	})
-	if err != nil {
-		panic(err)
 	}
-	return es
+	if config.DEBUG.Get(cfg) == "true" {
+		esCfg.EnableDebugLogger = true
+		esCfg.Logger = &CustomLogger{log.Logger}
+	}
+	return elasticsearch.NewTypedClient(esCfg)
 }
 
 type esClientKey struct{}
@@ -40,9 +47,9 @@ func TypedClient() *elasticsearch.TypedClient {
 }
 
 // FromContext returns the Elasticsearch client attached to the context.
-func FromContext(ctx context.Context) *elasticsearch.TypedClient {
+func FromContext(ctx context.Context) (*elasticsearch.TypedClient, error) {
 	if es, ok := ctx.Value(esClientKey{}).(elasticsearch.TypedClient); ok {
-		return &es
+		return &es, nil
 	}
 	return NewTypedClient()
 }

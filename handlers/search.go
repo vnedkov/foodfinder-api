@@ -4,30 +4,68 @@ import (
 	"encoding/json"
 	"foodfinder-api/elasticsearch"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/elastic/go-elasticsearch/v8/typedapi/types"
+)
+
+const (
+	defaultPageSize = 10
 )
 
 // SearchHandler is an HTTP handler that performs a search query against the Elasticsearch index
 func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse the search query from the request
-	query := r.URL.Query().Get("q")
+	q := r.URL.Query().Get("q")
+	from := r.URL.Query().Get("from")
+	to := r.URL.Query().Get("to")
+	pageStr := r.URL.Query().Get("page")
+	sizeStr := r.URL.Query().Get("size")
+
+	// Validate the query parameters
+	// TODO: Implement validation for the query string
+	page := 0
+	if pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err != nil {
+			_ = handleError(w, r, err, http.StatusBadRequest, "Invalid page number")
+		} else {
+			page = p
+		}
+	}
+
+	pageSize := defaultPageSize
+	if sizeStr != "" {
+		if s, err := strconv.Atoi(sizeStr); err != nil {
+			_ = handleError(w, r, err, http.StatusBadRequest, "Invalid page size")
+		} else {
+			pageSize = s
+		}
+	}
+
+	if from == "" {
+		from = time.Now().Format("2006-01-02")
+	} else if _, err := time.Parse("2006-01-02", from); err != nil {
+		_ = handleError(w, r, err, http.StatusBadRequest, "Invalid from date format")
+	}
+	if _, err := time.Parse("2006-01-02", to); err != nil {
+		_ = handleError(w, r, err, http.StatusBadRequest, "Invalid from date format")
+	}
 
 	// Create a new Elasticsearch client
-	es := elasticsearch.FromContext(r.Context())
+	es, err := elasticsearch.FromContext(r.Context())
+	if handleError(w, r, err, http.StatusInternalServerError, "Error getting Elasticsearch client") {
+		return
+	}
+
+	query := getQueryFilters(&from, &to, &q)
 
 	// Perform the search query
 	res, err := es.Search().
 		Index(elasticsearch.Index).
-		Query(&types.Query{
-			Match: map[string]types.MatchQuery{
-				"keywords": {
-					Query: query,
-				},
-			},
-		}).
-		From(0).
-		Size(10).
+		Query(query).
+		From(page * pageSize).
+		Size(pageSize).
 		Pretty(true).
 		Do(r.Context())
 
@@ -50,4 +88,32 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	// Return the search results as JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(searchResponse)
+}
+
+func getQueryFilters(from, to, q *string) *types.Query {
+	// Create a new query filter
+	query := types.Query{
+		Bool: &types.BoolQuery{
+			Filter: []types.Query{
+				{
+					Range: map[string]types.RangeQuery{
+						"date": types.DateRangeQuery{
+							Gte: from,
+							Lte: to,
+						},
+					},
+				},
+			},
+			Must: []types.Query{
+				{
+					Match: map[string]types.MatchQuery{
+						"keywords": {
+							Query: *q,
+						},
+					},
+				},
+			},
+		},
+	}
+	return &query
 }

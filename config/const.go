@@ -1,6 +1,8 @@
 package config
 
 const (
+	DEBUG Key = "DEBUG"
+
 	// ES_URL is the key for the Elasticsearch URL.
 	ES_URL Key = "ELASTICSEARCH_URL"
 
