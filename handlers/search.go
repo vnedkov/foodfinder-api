@@ -22,6 +22,7 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	to := r.URL.Query().Get("to")
 	pageStr := r.URL.Query().Get("page")
 	sizeStr := r.URL.Query().Get("size")
+	// hallStr := r.URL.Query().Get("hall")
 
 	// Validate the query parameters
 	// TODO: Implement validation for the query string
@@ -48,8 +49,10 @@ func SearchHandler(w http.ResponseWriter, r *http.Request) {
 	} else if _, err := time.Parse("2006-01-02", from); err != nil {
 		_ = handleError(w, r, err, http.StatusBadRequest, "Invalid from date format")
 	}
-	if _, err := time.Parse("2006-01-02", to); err != nil {
-		_ = handleError(w, r, err, http.StatusBadRequest, "Invalid from date format")
+	if to == "" {
+		to = time.Now().AddDate(0, 0, 15).Format("2006-01-02")
+	} else if _, err := time.Parse("2006-01-02", to); err != nil {
+		_ = handleError(w, r, err, http.StatusBadRequest, "Invalid to date format")
 	}
 
 	// Create a new Elasticsearch client
