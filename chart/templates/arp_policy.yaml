@@ -1,0 +1,12 @@
+apiVersion: "cilium.io/v2alpha1"
+kind: CiliumL2AnnouncementPolicy
+metadata:
+  name: "{{ .Chart.Name }}-arp-policy"
+spec:
+  externalIPs: true
+  loadBalancerIPs: true
+  interfaces:
+    - eth0
+  serviceSelector:
+    matchLabels:
+      io.cilium.gateway/owning-gateway: "{{ .Chart.Name }}-gateway"
