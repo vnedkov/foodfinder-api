@@ -65,22 +65,22 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: elasticsearch-secret
-                key: ELASTICSEARCH_URL
+                key: url
           - name: ELASTICSEARCH_USER
             valueFrom:
               secretKeyRef:
                 name: elasticsearch-secret
-                key: ELASTICSEARCH_USER
+                key: user
           - name: ELASTICSEARCH_PASSWORD
             valueFrom:
               secretKeyRef:
                 name: elasticsearch-secret
-                key: ELASTICSEARCH_PASSWORD
+                key: password
           - name: ELASTICSEARCH_INDEX
             valueFrom:
               secretKeyRef:
                 name: elasticsearch-secret
-                key: ELASTICSEARCH_INDEX
+                key: index
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}

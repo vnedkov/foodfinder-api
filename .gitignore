@@ -16,7 +16,7 @@ foodfinder-api
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
 
 # Go workspace file
 go.work
@@ -27,3 +27,6 @@ go.work.sum
 
 # VSCode settings
 .vscode
+
+# Raw Secrets - never to be committed
+.secrets
