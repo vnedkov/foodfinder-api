@@ -71,4 +71,4 @@ spec:
   serviceSelector:
     matchLabels:
       app: foodfinder-api
-{{- include "helm.selectorLabels" . | nindent 6 }}
+---
