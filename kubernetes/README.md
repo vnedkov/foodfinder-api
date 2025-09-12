@@ -14,7 +14,7 @@ Here is an example. Replace the values according your setup. You must use single
 ```shell
 kubectl create secret generic elasticsearch-secret \
 -n foodfinder \
---from-literal=ELASTICSEARCH_URL='http://localhost:9200' \ 
+--from-literal=ELASTICSEARCH_URL='http://localhost:9200' \
 --from-literal=ELASTICSEARCH_USER=elastic \
 --from-literal=ELASTICSEARCH_PASSWORD='elastic-user-password' \
 --from-literal=ELASTICSEARCH_INDEX=foodfinder # The name of the index to search
