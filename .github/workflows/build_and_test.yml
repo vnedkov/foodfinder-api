@@ -19,7 +19,7 @@ jobs:
         run: |
           # Set the required variables
           repo_owner="vnedkov" 
-          repo_name="build"  
+          repo_name="builder"  
           event_type="trigger-workflow" 
           service="foodfinder-api"
           version="latest"
