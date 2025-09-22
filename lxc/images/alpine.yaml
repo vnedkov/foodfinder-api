@@ -1,0 +1,41 @@
+image:
+  description: Foodfinder on Alpine Linux
+  distribution: minimalalpine
+  release: 3.22.1
+
+source:
+  #  downloader: alpinelinux-http 
+  #  url: http://dl-cdn.alpinelinux.org/alpine/ 
+  #  keys: 
+  #    - 0482D84022F52DF1C4E7CD43293ACD0907D9495A 
+  #  keyserver: keyserver.ubuntu.com 
+  downloader: rootfs-http
+  url: file://alpine-3.22-default_20250617_amd64.tar.xz
+
+targets:
+  lxc:
+    create_message: |
+      {{ image.description }} container.
+    config:
+    - type: all
+      before: 5
+      content: |-
+        lxc.include = LXC_TEMPLATE_CONFIG/alpine.common.conf
+    - type: user
+      before: 5
+      content: |-
+        lxc.include = LXC_TEMPLATE_CONFIG/alpine.userns.conf
+    - type: all
+      after: 4
+      content: |-
+        lxc.include = LXC_TEMPLATE_CONFIG/common.conf
+    - type: user
+      after: 4
+      content: |-
+        lxc.include = LXC_TEMPLATE_CONFIG/userns.conf
+    - type: all
+      content: |-
+        lxc.arch = {{ image.architecture_personality }}
+
+packages:
+  manager: apk
