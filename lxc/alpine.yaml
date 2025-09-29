@@ -35,4 +35,3 @@ targets:
 packages:
   manager: apk
   update: true
-  upgrade: true
